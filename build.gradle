@@ -1,0 +1,42 @@
+apply plugin: 'application'
+apply plugin: 'java'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+mainClassName = 'br.com.nfpdfgenerator.LambdaHandler'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation('com.amazonaws:aws-lambda-java-core:1.2.0')
+    implementation('com.amazonaws:aws-java-sdk-s3:1.11.603')
+    implementation('net.sf.jasperreports:jasperreports:6.8.0')
+    implementation('commons-io:commons-io:2.6')
+    implementation('org.lucee:itext:2.1.7')
+    implementation('org.lucee:xalan:2.7.2')
+    implementation('net.sourceforge.barbecue:barbecue:1.5-beta1')
+    implementation('org.hibernate:hibernate-core:5.2.10.Final')
+    implementation('org.postgresql:postgresql:42.1.4.jre7')
+}
+
+configurations {
+    compile.exclude module: 'itext', group: 'com.lowagie'
+}
+
+ext.copyJar = { directoryName ->
+    copy {
+        from 'build/libs'
+        include '*.jar'
+        rename '(.+)-[0-9]*\\.[0-9]*\\.jar', '$1.jar'
+        into 'docker/'
+    }
+}
+
+build {
+    doLast {
+        copyJar('lambda-nf-pdf-generator')
+    }
+}
